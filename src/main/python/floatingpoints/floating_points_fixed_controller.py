@@ -16,7 +16,15 @@ class FloatingPointController(QWidget):
 
     def __init__(self):
         super().__init__()
+        # Create instance of ui class
+        self.main_form = floating_points_fixed_view.Ui_main_form()
+        # Call init_ui
+        self.init_ui()
         pass
+
+    def init_ui(self):
+        # Call setup from view
+        self.main_form.setupUi(self)
 
     def new_point(self):
         """
@@ -95,4 +103,6 @@ if __name__ == "__main__":
     c = FloatingPointController()
     c.show()
     c.refresh_loop()
+    # TODO: Remove. For testing porpuses to keep window open.
+    app.exec_()
     sys.exit()
