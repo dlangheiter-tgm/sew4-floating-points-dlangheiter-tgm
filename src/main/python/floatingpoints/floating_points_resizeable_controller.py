@@ -12,7 +12,11 @@ class FloatingPointController(QWidget):
 
     :ivar safe_close: Safe closing of initiated points
     :ivar point_positions: List of points as a reference to a Integer-Array of Shared memory
+    :ivar processes: The array of processes to join them again
     :ivar main_form: Qt Form
+    :ivar process_width: Thread-safe value of the window width
+    :ivar process_height: Thread-safe value of the window height
+    :ivar color_lookup: Array to lookup color by index from dialog
     """
 
     # Color lookup by index (from dialog)
@@ -35,6 +39,9 @@ class FloatingPointController(QWidget):
         self.process_height = multiprocessing.Value('i', self.height())
 
     def init_ui(self):
+        """
+        Initiating the ui and connecting the buttons.
+        """
         # Call setup from view
         self.main_form.setupUi(self)
         # Connected click of new_point to call self.new_point
@@ -44,7 +51,8 @@ class FloatingPointController(QWidget):
 
     def new_point(self):
         """
-        Add a new point
+        Add a new point with random start position and random velocity.
+        Color and size is set by the user trough an dialog
         """
 
         # get data from point_creator dialog
@@ -80,7 +88,10 @@ class FloatingPointController(QWidget):
     def get_new_point_data(self):
         """
         Opens an dialog to ask the user for the information of the new point. Size and Color
-        :return: (ok, size, color)
+        Ok in the output is an indicator if the user pressed ok or cancel.
+        If the user pressed cancel return will be (False, -1, -1)
+
+        :return: (ok: boolean, size: int 3-50, color: int 0-3 [Red, Green, Blue, Black])
         """
         # Setting up dialog
         dialog = QDialog(self)
@@ -157,7 +168,6 @@ class FloatingPointController(QWidget):
         Setting also safe_close to True, which closes the application.
 
         :param event: Event object which contains the event parameters
-        :return:
         """
         for point in self.point_positions:
             point[4] = 0
@@ -194,13 +204,15 @@ class FloatingPointController(QWidget):
 
 def living_point(point_position, vx, vy, window_width_proc, window_height_proc):
     """
-    Method for concurrent processing of 2D-points
+    Method for concurrent processing of 2D-points.
+    Updates point position every .05 seconds.
+    Takes into account the window width and height to bounce the ball
 
     :param point_position: Reference to Integer-Array as Shared memory
-    :param vx:
-    :param vy:
-    :param window_width_proc:
-    :param window_height_proc:
+    :param vx: Velocity x-axis
+    :param vy: Velocity y-axis
+    :param window_width_proc: Thread safe width (multiprocessing.Value)
+    :param window_height_proc: Thread safe height (multiprocessing.Value)
 
     """
     while point_position[4]:

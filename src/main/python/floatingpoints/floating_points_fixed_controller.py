@@ -11,6 +11,7 @@ class FloatingPointController(QWidget):
 
     :ivar safe_close: Safe closing of initiated points
     :ivar point_positions: List of points as a reference to a Integer-Array of Shared memory
+    :ivar processes: The array of processes to join them again
     :ivar main_form: Qt Form
     """
 
