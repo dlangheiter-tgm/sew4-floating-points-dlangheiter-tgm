@@ -15,6 +15,7 @@ class FloatingPointController(QWidget):
     :ivar main_form: Qt Form
     """
 
+    # Color lookup by index (from dialog)
     color_lookup = [QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255), QColor(0, 0, 0)]
 
     def __init__(self):
@@ -29,7 +30,7 @@ class FloatingPointController(QWidget):
         self.point_positions = []
         # Init processes array
         self.processes = []
-        # Init process array for Threads to read size
+        # Init thread saves values for child threads
         self.process_width = multiprocessing.Value('i', self.width())
         self.process_height = multiprocessing.Value('i', self.height())
 
@@ -46,10 +47,11 @@ class FloatingPointController(QWidget):
         Add a new point
         """
 
+        # get data from point_creator dialog
         ok, size, color = self.get_new_point_data()
 
         if not ok:
-            # Return because user clicked abort
+            # Return because user clicked cancel
             return
 
         # Generation random numbers to initialize new Point
@@ -80,15 +82,24 @@ class FloatingPointController(QWidget):
         Opens an dialog to ask the user for the information of the new point. Size and Color
         :return: (ok, size, color)
         """
+        # Setting up dialog
         dialog = QDialog(self)
+        # Setting up point_creator
         point_creator = floating_points_point_creator.Ui_point_creator()
+        # Combining dialog with point_creator
         point_creator.setupUi(dialog)
+        # Execute dialog and save result
         result = dialog.exec_()
+        # check if user clicked cancel
         if result == 0:
+            # if user clicked cancel return false, -1, -1
             return False, -1, -1
 
+        # get size from dialog
         size = point_creator.size_box.value()
+        # get color index from dialog
         color = point_creator.color_select.currentIndex()
+        # return True, size, color
         return True, size, color
 
     def remove_point(self):
@@ -156,7 +167,12 @@ class FloatingPointController(QWidget):
 
         self.safe_close = True
 
-    def resizeEvent(self, QResizeEvent):
+    def resizeEvent(self, event):
+        """
+        Saving the new width and height
+        :param event: Resize Event
+        """
+        # set thread save width and height
         self.process_width.value = self.width()
         self.process_height.value = self.height()
 
@@ -188,6 +204,7 @@ def living_point(point_position, vx, vy, window_width_proc, window_height_proc):
 
     """
     while point_position[4]:
+        # Get values from thread save values
         window_width = window_width_proc.value
         window_height = window_height_proc.value
         dx = int((point_position[0] + vx) / window_width)
