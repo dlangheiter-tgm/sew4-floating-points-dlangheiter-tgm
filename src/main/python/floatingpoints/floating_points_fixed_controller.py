@@ -55,11 +55,12 @@ class FloatingPointController(QWidget):
         point_position = multiprocessing.Array('i', [w, h, 1])
         # Creating Thread
         process = multiprocessing.Process(target=living_point,
-                                          args=(point_position,
-                                                dx,
-                                                dy,
-                                                width,
-                                                height))
+                                          args=(
+                                              point_position,
+                                              dx,
+                                              dy,
+                                              width,
+                                              height))
 
         # Starting process
         process.start()
@@ -71,6 +72,9 @@ class FloatingPointController(QWidget):
         """
         Remove the last initiated point
         """
+
+        if len(self.point_positions) < 1:
+            return
 
         # Removing point_position and process from their array and saving them
         point_position = self.point_positions.pop()
@@ -121,8 +125,13 @@ class FloatingPointController(QWidget):
         :param event: Event object which contains the event parameters
         :return:
         """
-        print("closeEvent")
-        pass
+        for point in self.point_positions:
+            point[2] = 0
+
+        for process in self.processes:
+            process.join()
+
+        self.safe_close = True
 
     def refresh_loop(self):
         """
@@ -151,7 +160,6 @@ def living_point(point_position, vx, vy, window_width, window_height):
     :param window_height:
 
     """
-    print("living_point")
     while point_position[2]:
         dx = int((point_position[0] + vx) / window_width)
         dy = int((point_position[1] + vy) / window_height)
