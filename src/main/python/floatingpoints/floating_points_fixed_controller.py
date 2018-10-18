@@ -39,12 +39,17 @@ class FloatingPointController(QWidget):
         Add a new point
         """
 
-        print("New Point")
-        point_position = multiprocessing.Array('i', [0, 0, 1])
+        w = random.randint(0, self.width())
+        h = random.randint(0, self.height())
+        dx = random.randint(-7, 7)
+        dy = random.randint(-7, 7)
+
+        point_position = multiprocessing.Array('i', [w, h, 1])
         self.point_positions.append(point_position)
-        p = multiprocessing.Process(target=living_point, args=(point_position, 5, 5,
-                                                               self.width(),
-                                                               self.height()))
+        p = multiprocessing.Process(target=living_point,
+                                    args=(point_position, dx, dy,
+                                          self.width(),
+                                          self.height()))
         p.start()
         pass
 
@@ -74,9 +79,9 @@ class FloatingPointController(QWidget):
         :param qt_painter: Painter Object for Widget painting
         :return: 
         """
+        qt_painter.setPen(QPen(QColor(255, 0, 0)))
         for point in self.point_positions:
-            print("Draw Point", point[0], point[1])
-            qt_painter.drawEllipse(QRectF(QRect(point[0], point[1], 10, 10)))
+            qt_painter.drawEllipse(QRect(point[0], point[1], 5, 5))
         pass
 
     def closeEvent(self, event):
@@ -121,9 +126,9 @@ def living_point(point_position, vx, vy, window_width, window_height):
         dx2 = point_position[0] + vx < 0
         dy2 = point_position[1] + vy < 0
         point_position[0] = point_position[0] + vx - dx * ((point_position[0] + vx) % window_width) - dx2 * (
-                    point_position[0] + vx)
+                point_position[0] + vx)
         point_position[1] = point_position[1] + vy - dy * ((point_position[1] + vy) % window_height) - dy2 * (
-                    point_position[1] + vy)
+                point_position[1] + vy)
         vx = int((-2 * (dx - 0.5)) * int(-2 * (dx2 - 0.5)) * vx)
         vy = int((-2 * (dy - 0.5)) * int(-2 * (dy2 - 0.5)) * vy)
         time.sleep(0.05)
