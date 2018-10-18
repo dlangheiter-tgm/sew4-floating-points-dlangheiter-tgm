@@ -27,6 +27,8 @@ class FloatingPointController(QWidget):
         self.main_form.setupUi(self)
         # Connected click of new_point to call self.new_point
         self.main_form.new_point.clicked.connect(self.new_point)
+        # Connected click of remove_point to call self.remove_point
+        self.main_form.remove_point.clicked.connect(self.remove_point)
 
     def new_point(self):
         """
@@ -39,6 +41,7 @@ class FloatingPointController(QWidget):
         """
         Remove the last initiated point
         """
+        print("Remove Point")
         pass
 
     def paintEvent(self, event):
