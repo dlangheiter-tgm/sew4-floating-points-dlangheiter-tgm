@@ -20,6 +20,10 @@ class FloatingPointController(QWidget):
         self.main_form = floating_points_fixed_view.Ui_main_form()
         # Call init_ui
         self.init_ui()
+        # Init safe close
+        self.safe_close = False
+        # Init point_positions
+        self.point_positions = []
         pass
 
     def init_ui(self):
@@ -34,7 +38,14 @@ class FloatingPointController(QWidget):
         """
         Add a new point
         """
+
         print("New Point")
+        point_position = multiprocessing.Array('i', [0, 0, 1])
+        self.point_positions.append(point_position)
+        p = multiprocessing.Process(target=living_point, args=(point_position, 5, 5,
+                                                               self.width(),
+                                                               self.height()))
+        p.start()
         pass
 
     def remove_point(self):
@@ -49,6 +60,11 @@ class FloatingPointController(QWidget):
 
         :param event: QPaintEvent, but we ignore the value and repaint the whole qwidget
         """
+        painter = QPainter()
+        painter.begin(self)
+        self.draw_points(painter)
+        painter.end()
+
         pass
 
     def draw_points(self, qt_painter):
@@ -58,6 +74,9 @@ class FloatingPointController(QWidget):
         :param qt_painter: Painter Object for Widget painting
         :return: 
         """
+        for point in self.point_positions:
+            print("Draw Point", point[0], point[1])
+            qt_painter.drawEllipse(QRectF(QRect(point[0], point[1], 10, 10)))
         pass
 
     def closeEvent(self, event):
@@ -70,12 +89,16 @@ class FloatingPointController(QWidget):
         :param event: Event object which contains the event parameters
         :return:
         """
+        print("closeEvent")
         pass
 
     def refresh_loop(self):
         """
         Refreshing the GUI every .025 seconds and processing any QApplication Events
         """
+        #while not self.safe_close:
+        #    self.repaint(0, 0, self.width(), self.height())
+        #    time.sleep(.025)
         pass
 
 
@@ -90,6 +113,7 @@ def living_point(point_position, vx, vy, window_width, window_height):
     :param window_height:
 
     """
+    print("living_point")
     while point_position[2]:
         dx = int((point_position[0] + vx) / window_width)
         dy = int((point_position[1] + vy) / window_height)
