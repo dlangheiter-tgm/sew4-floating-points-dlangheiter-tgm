@@ -12,3 +12,4 @@ target/
 .vscode/
 src/main/python/floatingpoints/floating_points_fixed_view.py
 src/main/python/floatingpoints/floating_points_resizeable_view.py
+src/main/python/floatingpoints/floating_points_point_creator.py
