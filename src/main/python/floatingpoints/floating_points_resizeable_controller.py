@@ -29,7 +29,9 @@ class FloatingPointController(QWidget):
         self.point_positions = []
         # Init processes array
         self.processes = []
-        pass
+        # Init process array for Threads to read size
+        self.process_width = multiprocessing.Value('i', self.width())
+        self.process_height = multiprocessing.Value('i', self.height())
 
     def init_ui(self):
         # Call setup from view
@@ -47,15 +49,12 @@ class FloatingPointController(QWidget):
         ok, size, color = self.get_new_point_data()
 
         if not ok:
+            # Return because user clicked abort
             return
 
-        # Getting width and height
-        width = self.width()
-        height = self.height()
-
         # Generation random numbers to initialize new Point
-        w = random.randint(0, width)
-        h = random.randint(0, height)
+        w = random.randint(0, self.process_width.value)
+        h = random.randint(0, self.process_height.value)
         dx = random.randint(-7, 7)
         dy = random.randint(-7, 7)
 
@@ -67,8 +66,8 @@ class FloatingPointController(QWidget):
                                               point_position,
                                               dx,
                                               dy,
-                                              width,
-                                              height))
+                                              self.process_width,
+                                              self.process_height))
 
         # Starting process
         process.start()
@@ -105,7 +104,7 @@ class FloatingPointController(QWidget):
         process = self.processes.pop()
 
         # Signaling process to stop
-        point_position[2] = 0
+        point_position[4] = 0
         # Waiting for process to stop
         process.join()
 
@@ -132,12 +131,12 @@ class FloatingPointController(QWidget):
         :return: 
         """
 
-        # Setting the border color to Red
-        qt_painter.setPen(QPen(QColor(255, 0, 0)))
         # For every point in the array of points
         for point in self.point_positions:
+            # Set border color dependent of point color
+            qt_painter.setPen(self.color_lookup[point[3]])
             # Paint an Ellipse at that position
-            qt_painter.drawEllipse(QRect(point[0], point[1], 5, 5))
+            qt_painter.drawEllipse(QRect(point[0], point[1], point[2], point[2]))
 
     def closeEvent(self, event):
         """
@@ -150,12 +149,16 @@ class FloatingPointController(QWidget):
         :return:
         """
         for point in self.point_positions:
-            point[2] = 0
+            point[4] = 0
 
         for process in self.processes:
             process.join()
 
         self.safe_close = True
+
+    def resizeEvent(self, QResizeEvent):
+        self.process_width.value = self.width()
+        self.process_height.value = self.height()
 
     def refresh_loop(self):
         """
@@ -173,18 +176,20 @@ class FloatingPointController(QWidget):
             time.sleep(.025)
 
 
-def living_point(point_position, vx, vy, window_width, window_height):
+def living_point(point_position, vx, vy, window_width_proc, window_height_proc):
     """
     Method for concurrent processing of 2D-points
 
     :param point_position: Reference to Integer-Array as Shared memory
     :param vx:
     :param vy:
-    :param window_width:
-    :param window_height:
+    :param window_width_proc:
+    :param window_height_proc:
 
     """
     while point_position[4]:
+        window_width = window_width_proc.value
+        window_height = window_height_proc.value
         dx = int((point_position[0] + vx) / window_width)
         dy = int((point_position[1] + vy) / window_height)
         dx2 = point_position[0] + vx < 0
