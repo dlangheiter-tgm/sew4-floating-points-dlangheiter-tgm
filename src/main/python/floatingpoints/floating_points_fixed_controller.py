@@ -24,6 +24,8 @@ class FloatingPointController(QWidget):
         self.safe_close = False
         # Init point_positions
         self.point_positions = []
+        # Init processes array
+        self.processes = []
         pass
 
     def init_ui(self):
@@ -39,38 +41,60 @@ class FloatingPointController(QWidget):
         Add a new point
         """
 
-        w = random.randint(0, self.width())
-        h = random.randint(0, self.height())
+        # Getting width and height
+        width = self.width()
+        height = self.height()
+
+        # Generation random numbers to initialize new Point
+        w = random.randint(0, width)
+        h = random.randint(0, height)
         dx = random.randint(-7, 7)
         dy = random.randint(-7, 7)
 
+        # Creating Thread-safe array
         point_position = multiprocessing.Array('i', [w, h, 1])
+        # Creating Thread
+        process = multiprocessing.Process(target=living_point,
+                                          args=(point_position,
+                                                dx,
+                                                dy,
+                                                width,
+                                                height))
+
+        # Starting process
+        process.start()
+        # Adding point_position and process to their arrays
         self.point_positions.append(point_position)
-        p = multiprocessing.Process(target=living_point,
-                                    args=(point_position, dx, dy,
-                                          self.width(),
-                                          self.height()))
-        p.start()
-        pass
+        self.processes.append(process)
 
     def remove_point(self):
         """
         Remove the last initiated point
         """
-        print("Remove Point")
-        pass
+
+        # Removing point_position and process from their array and saving them
+        point_position = self.point_positions.pop()
+        process = self.processes.pop()
+
+        # Signaling process to stop
+        point_position[2] = 0
+        # Waiting for process to stop
+        process.join()
 
     def paintEvent(self, event):
         """ React to a paint event
 
         :param event: QPaintEvent, but we ignore the value and repaint the whole qwidget
         """
-        painter = QPainter()
-        painter.begin(self)
-        self.draw_points(painter)
-        painter.end()
 
-        pass
+        # Creating QPainter
+        painter = QPainter()
+        # Start QPainter to paint on this QWidget
+        painter.begin(self)
+        # Led draw_points draw the points with the QPainter
+        self.draw_points(painter)
+        # Stop QPainter and release resources (QWidget)
+        painter.end()
 
     def draw_points(self, qt_painter):
         """
@@ -79,6 +103,7 @@ class FloatingPointController(QWidget):
         :param qt_painter: Painter Object for Widget painting
         :return: 
         """
+
         qt_painter.setPen(QPen(QColor(255, 0, 0)))
         for point in self.point_positions:
             qt_painter.drawEllipse(QRect(point[0], point[1], 5, 5))
