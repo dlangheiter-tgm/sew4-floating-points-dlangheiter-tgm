@@ -26,9 +26,11 @@ class FloatingPointController(QWidget):
         self.point_positions = []
         # Init processes array
         self.processes = []
-        pass
 
     def init_ui(self):
+        """
+        Initiating the ui and connecting the buttons.
+        """
         # Call setup from view
         self.main_form.setupUi(self)
         # Connected click of new_point to call self.new_point
@@ -38,7 +40,7 @@ class FloatingPointController(QWidget):
 
     def new_point(self):
         """
-        Add a new point
+        Add a new point with random start position and random velocity
         """
 
         # Getting width and height
@@ -102,10 +104,9 @@ class FloatingPointController(QWidget):
 
     def draw_points(self, qt_painter):
         """
-        Drawing all the Points from the point_positions List in their colours and sizes
+        Drawing all the Points from the point_positions List
 
         :param qt_painter: Painter Object for Widget painting
-        :return: 
         """
 
         # Setting the border color to Red
@@ -123,7 +124,6 @@ class FloatingPointController(QWidget):
         Setting also safe_close to True, which closes the application.
 
         :param event: Event object which contains the event parameters
-        :return:
         """
         for point in self.point_positions:
             point[2] = 0
@@ -151,13 +151,15 @@ class FloatingPointController(QWidget):
 
 def living_point(point_position, vx, vy, window_width, window_height):
     """
-    Method for concurrent processing of 2D-points
+    Method for concurrent processing of 2D-points.
+    Updates point position every .05 seconds.
+    Takes into account the window width and height to bounce the ball
 
     :param point_position: Reference to Integer-Array as Shared memory
-    :param vx:
-    :param vy:
-    :param window_width:
-    :param window_height:
+    :param vx: Velocity x-axis
+    :param vy: Velocity y-axis
+    :param window_width: The width of the window
+    :param window_height: The height of the window
 
     """
     while point_position[2]:
