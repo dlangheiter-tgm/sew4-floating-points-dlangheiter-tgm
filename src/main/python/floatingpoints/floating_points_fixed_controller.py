@@ -96,9 +96,10 @@ class FloatingPointController(QWidget):
         """
         Refreshing the GUI every .025 seconds and processing any QApplication Events
         """
-        #while not self.safe_close:
-        #    self.repaint(0, 0, self.width(), self.height())
-        #    time.sleep(.025)
+        while not self.safe_close:
+            app.processEvents()
+            self.repaint()
+            time.sleep(.025)
         pass
 
 
