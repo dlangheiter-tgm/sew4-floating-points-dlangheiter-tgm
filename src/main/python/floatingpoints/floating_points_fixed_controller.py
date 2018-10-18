@@ -104,10 +104,12 @@ class FloatingPointController(QWidget):
         :return: 
         """
 
+        # Setting the border color to Red
         qt_painter.setPen(QPen(QColor(255, 0, 0)))
+        # For every point in the array of points
         for point in self.point_positions:
+            # Paint an Ellipse at that position
             qt_painter.drawEllipse(QRect(point[0], point[1], 5, 5))
-        pass
 
     def closeEvent(self, event):
         """
@@ -126,11 +128,16 @@ class FloatingPointController(QWidget):
         """
         Refreshing the GUI every .025 seconds and processing any QApplication Events
         """
+
+        # While close event was not called and set save_close to true, run refresh_loop
         while not self.safe_close:
+            # Process QApplication Events
             app.processEvents()
+            # Repaint whole panel, needed because it normally only repaints if it needs to
+            # (when hovering button or something)
             self.repaint()
+            # Wait for .025 Seconds
             time.sleep(.025)
-        pass
 
 
 def living_point(point_position, vx, vy, window_width, window_height):
@@ -164,6 +171,4 @@ if __name__ == "__main__":
     c = FloatingPointController()
     c.show()
     c.refresh_loop()
-    # TODO: Remove. For testing porpuses to keep window open.
-    app.exec_()
     sys.exit()
