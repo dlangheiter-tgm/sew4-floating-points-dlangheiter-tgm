@@ -25,11 +25,14 @@ class FloatingPointController(QWidget):
     def init_ui(self):
         # Call setup from view
         self.main_form.setupUi(self)
+        # Connected click of new_point to call self.new_point
+        self.main_form.new_point.clicked.connect(self.new_point)
 
     def new_point(self):
         """
         Add a new point
         """
+        print("New Point")
         pass
 
     def remove_point(self):
