@@ -40,6 +40,27 @@ Rot understrichen wird. Der Grund dahinter ist, dass `src/main/python`
 **nicht** als `Sources Root` markiert wurde. Dies tut man indem man
 den Ordner recht-klicked und `Mark Directory as` => `Sourced Root` drückt.
 
+Um auf die View zuzugreifen und diese zu initialisieren muss man in der `__init__(self)`
+```
+self.main_form = floating_points_fixed_view.Ui_main_form()
+```
+aufrufen um eine instanz der Klasse zu erstellen. **Achtung** diese kann auch anders heißen.
+Einfach mal in der View nachschauen.  
+Weiters muss mann die UI auch aufsetzten mit `setupUi(self)` und die
+`PushButton`s verbinden. Dies tut man mit diesen Befehlen:
+```
+self.main_form.setupUi(self)
+self.main_form.new_point.clicked.connect(self.new_point)
+self.main_form.remove_point.clicked.connect(self.remove_point)
+```
+
+Wenn man das jetzt laufen lassen würde, sieht man das Fenster nur ganz kurz.
+Der Grund dahinter ist das wir in `event_loop(self)` noch nichts haben.
+Doch dort einfach eine `while true:` zu machen geht auch nicht.
+Um jetzt **temporär** das Fenster weiter offen zu halten können
+wir `app.exec_()` ausfürhen nachden `c.event_loop()` aufgerufen wird.
+Diesen Auruf sollten wir später wieder entfernen.
+
 
 ## Quellen
 [Qt5 Docs](http://doc.qt.io/qt-5/)  
